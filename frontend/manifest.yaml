@@ -90,6 +90,8 @@ spec:
       containers:
       - name: frontend
         image: geethaprudhvi/frontend:1.2.0
+        ports:
+        - containerPort: 8080
       volumes:
       - name: nginx-conf
         configMap:
@@ -97,6 +99,10 @@ spec:
           items:
           - key: nginx.conf
             path: nginx.conf
+      volumeMounts:
+      - name: nginx-conf
+        mountPath: /etc/nginx/nginx.conf
+        subPath: nginx.conf
 ---
 apiVersion: v1
 kind: Service
