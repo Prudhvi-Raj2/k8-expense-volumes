@@ -90,6 +90,13 @@ spec:
       containers:
       - name: frontend
         image: geethaprudhvi/frontend:1.2.0
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf
+          items:
+          - key: nginx.conf
+            path: nginx.conf
 ---
 apiVersion: v1
 kind: Service
