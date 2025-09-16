@@ -1,0 +1,83 @@
+#Headless service, normal service, and stateful set
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-headless
+  namespace: expense
+  labels:
+    app: mysql
+    project: expense
+    tier: db
+spec:
+  clusterIP: None
+  selector:
+    app: mysql
+    project: expense
+    tier: db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+      name: mysql
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: expense
+  labels:
+    app: mysql
+    project: expense
+    tier: db
+spec:
+  selector:
+    app: mysql
+    project: expense
+    tier: db
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+      
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: expense
+  labels:
+    app: mysql
+    project: expense
+    tier: db
+spec:
+  serviceName: "mysql-headless"
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mysql
+      project: expense
+      tier: db
+  template:
+    metadata:
+      labels:
+        app: mysql
+        project: expense
+        tier: db
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mysql
+        image: geethaprudhvi/mysql:1.0.0
+        volumeMounts:
+        - name: mysql
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql
+      namespace: expense
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "ebs-sc" #storage class for dynamic provisioning
+      resources:
+        requests:
+          storage: 1Gi
